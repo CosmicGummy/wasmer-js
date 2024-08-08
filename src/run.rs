@@ -43,13 +43,24 @@ async fn run_wasix_inner(wasm_module: WasmModule, config: RunOptions) -> Result<
     let (exit_code_tx, exit_code_rx) = oneshot::channel();
 
     let module: wasmer::Module = wasm_module.to_module(&*runtime).await?;
+    let module_bytes = wasm_module
+        .dyn_ref::<js_sys::Uint8Array>()
+        .map(|array: &js_sys::Uint8Array| array.to_vec());
 
     // Note: The WasiEnvBuilder::run() method blocks, so we need to run it on
     // the thread pool.
     let tasks = runtime.task_manager().clone();
     tasks.spawn_with_module(
         module,
-        Box::new(move |module| {
+        Box::new(move |given_module| {
+            // Hacky way to get type hints to work
+            let module = module_bytes
+                .map(|array| {
+                    let store = wasmer::Store::default();
+                    wasmer::Module::new(&store, array.to_vec()).ok()
+                })
+                .flatten()
+                .unwrap_or(given_module);
             let _span = tracing::debug_span!("run").entered();
             let result = builder.run(module).map_err(anyhow::Error::new);
             let _ = exit_code_tx.send(ExitCondition::from_result(result));
