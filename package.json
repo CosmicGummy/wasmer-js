@@ -27,15 +27,15 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/WasmerSDK.d.ts",
+      "types": "./dist/src-js/WasmerSDK.d.ts",
       "default": "./dist/WasmerSDK.mjs"
     },
     "./bundled": {
-      "types": "./dist/WasmerSDK.d.ts",
+      "types": "./dist/src-js/WasmerSDK.d.ts",
       "default": "./dist/WasmerSDKBundled.mjs"
     },
     "./node": {
-      "types": "./dist/WasmerSDK.d.ts",
+      "types": "./dist/src-js/WasmerSDK.d.ts",
       "default": "./dist/node.mjs"
     },
     "./wasm": {
